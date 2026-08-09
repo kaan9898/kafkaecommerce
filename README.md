@@ -1,6 +1,6 @@
 # Kafka E-Commerce Microservices
 
-> **First-time setup:** Before running this project for the first time, follow [`KAFKA_SETUP.md`](./KAFKA_SETUP.md) to install and configure Apache Kafka 4.3.1 in KRaft mode.
+> **First-time setup:** Before running this project for the first time, follow [`Setup.md`](./Setup.md) to install and configure Apache Kafka 4.3.1 in KRaft mode.
 
 This README describes the project itself, its current features, architecture, Kafka communication flow, configuration, and the normal steps required to run the application after Kafka has already been installed.
 
