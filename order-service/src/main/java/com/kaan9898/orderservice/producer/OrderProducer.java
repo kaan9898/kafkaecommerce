@@ -1,7 +1,6 @@
 package com.kaan9898.orderservice.producer;
 
 import com.kaan9898.orderservice.dto.OrderCreatedEvent;
-import jakarta.annotation.Resource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 
@@ -16,5 +15,4 @@ public class OrderProducer {
     public void sendOrderCreatedEvent(OrderCreatedEvent orderCreatedEvent) {
         kafkaTemplate.send(TOPIC, orderCreatedEvent.orderId().toString(), orderCreatedEvent);
     }
-
 }
