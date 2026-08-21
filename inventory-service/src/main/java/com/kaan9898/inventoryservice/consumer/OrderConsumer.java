@@ -7,9 +7,15 @@ import com.kaan9898.inventoryservice.producer.InventoryProducer;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.Random;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
 @Component
 public class OrderConsumer {
     private final InventoryProducer inventoryProducer;
+    private final Set<UUID> processedOrders = ConcurrentHashMap.newKeySet();
 
     public OrderConsumer(InventoryProducer inventoryProducer) {
         this.inventoryProducer = inventoryProducer;
@@ -21,6 +27,14 @@ public class OrderConsumer {
         System.out.println("OrderId: "+ orderCreatedEvent.orderId());
         System.out.println("Product: "+ orderCreatedEvent.product());
         System.out.println("Quantity: "+ orderCreatedEvent.quantity());
+        if(processedOrders.contains(orderCreatedEvent.orderId())) {
+            System.out.println("Duplicate order ignored: " + orderCreatedEvent.orderId());
+            return;
+        }
+        if(new Random().nextBoolean()) {
+            System.out.println("Random error occurred: ");
+            throw new RuntimeException("Random inventory processing error");
+        }
         InventoryStatus status;
         if(orderCreatedEvent.quantity()<=5){
             status = InventoryStatus.AVAILABLE;
@@ -33,6 +47,7 @@ public class OrderConsumer {
                 status
         );
         inventoryProducer.sendInventoryResultEvent(result);
+        processedOrders.add(orderCreatedEvent.orderId());
         System.out.println("Inventory Result: " + status);
     }
 }
