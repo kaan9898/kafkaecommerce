@@ -1,3 +1,4 @@
 rootProject.name = 'kafkaecommerce'
 include 'order-service'
 include 'inventory-service'
+include 'notification-service'
