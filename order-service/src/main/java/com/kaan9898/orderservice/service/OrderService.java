@@ -1,7 +1,8 @@
 package com.kaan9898.orderservice.service;
 
 import com.kaan9898.orderservice.dto.InventoryResultEvent;
-import com.kaan9898.orderservice.dto.OrderCreatedEvent;
+import com.kaan9898.orderservice.dto.OrderEvent;
+import com.kaan9898.orderservice.dto.OrderEventType;
 import com.kaan9898.orderservice.dto.OrderRequest;
 import com.kaan9898.orderservice.entity.OrderEntity;
 import com.kaan9898.orderservice.entity.OrderStatus;
@@ -21,8 +22,9 @@ public class OrderService {
         this.orderProducer = orderProducer;
         this.orderRepository = orderRepository;
     }
-    public OrderCreatedEvent createOrder(OrderRequest request) {
+    public OrderEvent createOrder(OrderRequest request) {
         UUID orderId = UUID.randomUUID();
+        String correlationId = UUID.randomUUID().toString();
         LocalDateTime createdTime = LocalDateTime.now();
         OrderEntity orderEntity = new OrderEntity(
                 orderId,
@@ -33,15 +35,18 @@ public class OrderService {
                 createdTime
         );
         OrderEntity savedOrder = orderRepository.save(orderEntity);
-        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(
+        OrderEvent orderEvent = new OrderEvent(
+                OrderEventType.ORDER_CREATED,
                 savedOrder.getOrderId(),
                 savedOrder.getCustomerId(),
                 savedOrder.getProduct(),
                 savedOrder.getQuantity(),
-                savedOrder.getCreatedDate()
+                savedOrder.getCreatedDate(),
+                correlationId
         );
-        orderProducer.sendOrderCreatedEvent(orderCreatedEvent);
-        return orderCreatedEvent;
+        System.out.println(correlationId);
+        orderProducer.sendEvent(orderEvent);
+        return orderEvent;
     }
     @Transactional
     public void updateOrderStatus(InventoryResultEvent inventoryResultEvent) {

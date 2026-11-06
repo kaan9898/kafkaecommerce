@@ -1,6 +1,7 @@
 package com.kaan9898.orderservice.web.controller;
 
 import com.kaan9898.orderservice.dto.OrderCreatedEvent;
+import com.kaan9898.orderservice.dto.OrderEvent;
 import com.kaan9898.orderservice.dto.OrderRequest;
 import com.kaan9898.orderservice.service.OrderService;
 import jakarta.validation.Valid;
@@ -16,8 +17,8 @@ public class OrderController {
         this.orderService = orderService;
     }
     @PostMapping("/create")
-    public ResponseEntity<OrderCreatedEvent> createOrder(@Valid @RequestBody OrderRequest request) {
-        OrderCreatedEvent orderCreatedEvent = orderService.createOrder(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(orderCreatedEvent);
+    public ResponseEntity<OrderEvent> createOrder(@Valid @RequestBody OrderRequest request) {
+        OrderEvent orderEvent = orderService.createOrder(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderEvent);
     }
 }

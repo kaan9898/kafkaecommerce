@@ -13,6 +13,7 @@ public record OrderCreatedEvent(
         String product,
         @Positive
         Integer quantity,
-        LocalDateTime createdTime
+        LocalDateTime createdTime,
+        String correlationId
 ) {
 }

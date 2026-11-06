@@ -1,10 +1,12 @@
 package com.kaan9898.inventoryservice.consumer;
 
-import com.kaan9898.inventoryservice.dto.OrderCreatedEvent;
 import com.kaan9898.inventoryservice.dto.InventoryResultEvent;
+import com.kaan9898.inventoryservice.dto.OrderEvent;
 import com.kaan9898.inventoryservice.entity.InventoryStatus;
 import com.kaan9898.inventoryservice.producer.InventoryProducer;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.KafkaHeaders;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.stereotype.Component;
 
 import java.util.Random;
@@ -21,14 +23,15 @@ public class OrderConsumer {
         this.inventoryProducer = inventoryProducer;
     }
 
-    @KafkaListener(topics = "order-created",groupId = "inventory-service")
-    public void consume(OrderCreatedEvent orderCreatedEvent) {
+    @KafkaListener(topics = "order-events",groupId = "${spring.kafka.consumer.group-id}")
+    public void consume(OrderEvent orderEvent, @Header(KafkaHeaders.RECEIVED_PARTITION) int partition) {
         System.out.println("Processing order: ");
-        System.out.println("OrderId: "+ orderCreatedEvent.orderId());
-        System.out.println("Product: "+ orderCreatedEvent.product());
-        System.out.println("Quantity: "+ orderCreatedEvent.quantity());
-        if(processedOrders.contains(orderCreatedEvent.orderId())) {
-            System.out.println("Duplicate order ignored: " + orderCreatedEvent.orderId());
+        System.out.println("OrderId: "+ orderEvent.orderId() + "CorrelationId: " + orderEvent.correlationId());
+        System.out.println("Order Id: "+ orderEvent.customerId() + " Partition: "+ partition + " OrderId: " + orderEvent.orderId());
+        System.out.println("Product: "+ orderEvent.product());
+        System.out.println("Quantity: "+ orderEvent.quantity());
+        if(processedOrders.contains(orderEvent.orderId())) {
+            System.out.println("Duplicate order ignored: " + orderEvent.orderId());
             return;
         }
         if(new Random().nextBoolean()) {
@@ -36,18 +39,18 @@ public class OrderConsumer {
             throw new RuntimeException("Random inventory processing error");
         }
         InventoryStatus status;
-        if(orderCreatedEvent.quantity()<=5){
+        if(orderEvent.quantity()<=5){
             status = InventoryStatus.AVAILABLE;
         }
         else{
             status = InventoryStatus.OUT_OF_STOCK;
         }
         InventoryResultEvent result = new InventoryResultEvent(
-                orderCreatedEvent.orderId(),
+                orderEvent.orderId(),
                 status
         );
         inventoryProducer.sendInventoryResultEvent(result);
-        processedOrders.add(orderCreatedEvent.orderId());
+        processedOrders.add(orderEvent.orderId());
         System.out.println("Inventory Result: " + status);
     }
 }
